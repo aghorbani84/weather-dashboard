@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 import SearchBar from './components/SearchBar';
 import CurrentConditions from './components/CurrentConditions';
 import DailyForecast from './components/DailyForecast';
@@ -35,6 +36,39 @@ function loadUnit(): Unit {
   return localStorage.getItem(UNIT_KEY) === 'fahrenheit' ? 'fahrenheit' : 'celsius';
 }
 
+/** Loading skeleton at the content's own geometry: hero shape, then tiles. */
+function LoadingSkeleton({ cityName }: { cityName: string }) {
+  return (
+    <div role="status" aria-label={`Loading weather for ${cityName}`}>
+      <div className="card skeleton-hero" aria-hidden="true">
+        <div className="skeleton skeleton-city" />
+        <div className="skeleton skeleton-cond" />
+        <div className="skeleton skeleton-temp" />
+        <div className="skeleton-stats">
+          <div className="skeleton" />
+          <div className="skeleton" />
+          <div className="skeleton" />
+          <div className="skeleton" />
+        </div>
+      </div>
+      <div className="content-grid">
+        <div className="card skeleton-card" aria-hidden="true">
+          <div className="skeleton skeleton-title" />
+          <div className="skeleton skeleton-chart" />
+        </div>
+        <div className="card skeleton-card skeleton-rows" aria-hidden="true">
+          <div className="skeleton skeleton-title" />
+          <div className="skeleton skeleton-row" />
+          <div className="skeleton skeleton-row" />
+          <div className="skeleton skeleton-row" />
+          <div className="skeleton skeleton-row" />
+        </div>
+      </div>
+      <p className="loading-note">Loading weather for {cityName}…</p>
+    </div>
+  );
+}
+
 export default function App() {
   const [city, setCity] = useState<City>(DEFAULT_CITY);
   const [unit, setUnit] = useState<Unit>(loadUnit);
@@ -68,7 +102,9 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div>
-          <h1>Weather Dashboard</h1>
+          <h1 className="wordmark">
+            Weather<span>.</span>
+          </h1>
           <p className="tagline">Live weather from Open-Meteo — no API key needed</p>
         </div>
         <div className="unit-toggle" role="group" aria-label="Temperature unit">
@@ -101,22 +137,31 @@ export default function App() {
       />
 
       <main>
-        {isPending && (
-          <div className="state-card" role="status">
-            <div className="spinner" aria-hidden="true" />
-            <p>Loading weather for {city.name}…</p>
-          </div>
-        )}
+        {isPending && <LoadingSkeleton cityName={city.name} />}
 
         {isError && (
           <div className="state-card error-card" role="alert">
+            <span className="error-icon" aria-hidden="true">
+              <AlertTriangle size={26} />
+            </span>
             <p className="error-title">Couldn&apos;t load the weather</p>
-            <p>
+            <p className="error-detail">
               The Open-Meteo service couldn&apos;t be reached
-              {error instanceof Error && error.message ? `: ${error.message}` : '.'}{' '}
+              {error instanceof Error && error.message ? (
+                <>
+                  : <code>{error.message}</code>
+                </>
+              ) : (
+                '.'
+              )}{' '}
               Please check your connection and try again.
             </p>
+            <p className="error-honesty">
+              Nothing is shown in place of the forecast — the app never invents
+              weather when the service doesn&apos;t answer.
+            </p>
             <button type="button" className="retry-btn" onClick={() => refetch()}>
+              <RefreshCw size={16} aria-hidden="true" />
               Try again
             </button>
           </div>
@@ -124,7 +169,12 @@ export default function App() {
 
         {data && (
           <>
-            {isFetching && <p className="refresh-note">Refreshing…</p>}
+            {isFetching && (
+              <p className="refresh-note">
+                <span className="mini-spinner" aria-hidden="true" />
+                Refreshing…
+              </p>
+            )}
             <CurrentConditions
               city={city}
               current={data.current}
@@ -132,8 +182,10 @@ export default function App() {
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
             />
-            <HourlyChart hourly={data.hourly} unit={unit} />
-            <DailyForecast daily={data.daily} unit={unit} />
+            <div className="content-grid">
+              <HourlyChart hourly={data.hourly} unit={unit} />
+              <DailyForecast daily={data.daily} unit={unit} />
+            </div>
             <p className="source-note">
               Data: Open-Meteo (open-meteo.com) · Times shown in {data.timezone}
             </p>

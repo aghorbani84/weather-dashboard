@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MapPin, Search } from 'lucide-react';
 import { useCitySearch } from '../hooks/useWeather';
 import type { City } from '../types';
 
@@ -37,6 +38,9 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
 
   return (
     <div className="search" ref={boxRef}>
+      <span className="search-icon" aria-hidden="true">
+        <Search size={18} />
+      </span>
       <input
         type="text"
         value={query}
@@ -49,7 +53,12 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
         aria-label="Search for a city"
         autoComplete="off"
       />
-      {isFetching && <span className="search-status">Searching…</span>}
+      {isFetching && (
+        <span className="search-status">
+          <span className="mini-spinner" aria-hidden="true" />
+          Searching…
+        </span>
+      )}
       {open && query.trim().length >= 2 && (
         <ul className="search-results">
           {isError && (
@@ -64,7 +73,10 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
           {results?.map((r) => (
             <li key={r.id}>
               <button type="button" onClick={() => handleSelect(r)}>
-                <span className="result-name">{r.name}</span>
+                <span className="result-name">
+                  <MapPin size={15} aria-hidden="true" />
+                  {r.name}
+                </span>
                 <span className="result-meta">
                   {[r.admin1, r.country].filter(Boolean).join(', ')}
                 </span>

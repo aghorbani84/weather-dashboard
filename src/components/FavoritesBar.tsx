@@ -1,3 +1,4 @@
+import { Star, X } from 'lucide-react';
 import type { City } from '../types';
 
 interface FavoritesBarProps {
@@ -11,6 +12,7 @@ export default function FavoritesBar({ favorites, activeId, onSelect, onRemove }
   if (favorites.length === 0) {
     return (
       <p className="favorites-empty">
+        <Star size={14} aria-hidden="true" />
         No favorite cities yet — search for a city and tap the star to save it here.
       </p>
     );
@@ -20,6 +22,7 @@ export default function FavoritesBar({ favorites, activeId, onSelect, onRemove }
       {favorites.map((city) => (
         <span key={city.id} className={`favorite-chip ${city.id === activeId ? 'active' : ''}`}>
           <button type="button" onClick={() => onSelect(city)}>
+            <Star size={13} fill="currentColor" aria-hidden="true" />
             {city.name}
           </button>
           <button
@@ -28,7 +31,7 @@ export default function FavoritesBar({ favorites, activeId, onSelect, onRemove }
             onClick={() => onRemove(city.id)}
             aria-label={`Remove ${city.name} from favorites`}
           >
-            ×
+            <X size={14} aria-hidden="true" />
           </button>
         </span>
       ))}
