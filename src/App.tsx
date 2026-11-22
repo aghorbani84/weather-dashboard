@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import SearchBar from './components/SearchBar';
 import CurrentConditions from './components/CurrentConditions';
 import DailyForecast from './components/DailyForecast';
 import HourlyChart from './components/HourlyChart';
+import HourlyStrip from './components/HourlyStrip';
+import DetailsGrid from './components/DetailsGrid';
+import ProofStrip, { type ProofStripState } from './components/ProofStrip';
 import FavoritesBar from './components/FavoritesBar';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { useTheme } from './hooks/useTheme';
 import { useForecast } from './hooks/useWeather';
-import type { City, Unit } from './types';
+import { formatTemp, type City, type Unit } from './types';
 
 const FAVORITES_KEY = 'weather-dashboard:favorites';
 const UNIT_KEY = 'weather-dashboard:unit';
@@ -78,7 +81,43 @@ export default function App() {
 
   const { style, mode, setStyle, toggleMode } = useTheme();
 
-  const { data, isPending, isError, error, refetch, isFetching } = useForecast(city);
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    isFetching,
+    fetchStatus,
+    dataUpdatedAt,
+  } = useForecast(city);
+
+  // Datasheet title (rank-1 lesson): name + version + the live numbers.
+  const datasheetTitle = data
+    ? `Weather Dashboard v2 — ${city.name} · ${formatTemp(data.current.temperature_2m, unit)} · 7-day + hourly`
+    : isError
+      ? 'Weather Dashboard v2 — forecast unavailable · 7-day + hourly'
+      : `Weather Dashboard v2 — loading ${city.name}… · 7-day + hourly`;
+
+  useEffect(() => {
+    document.title = datasheetTitle;
+  }, [datasheetTitle]);
+
+  // Proof-strip cache count: when the city changes and the new query already
+  // holds data with no fetch running, TanStack served it from cache.
+  const [cacheServes, setCacheServes] = useState(0);
+  const prevQueryKeyRef = useRef('');
+  const queryKey = `forecast:${city.latitude},${city.longitude}`;
+  useEffect(() => {
+    if (queryKey !== prevQueryKeyRef.current) {
+      prevQueryKeyRef.current = queryKey;
+      if (data && fetchStatus === 'idle' && !isFetching) {
+        setCacheServes((c) => c + 1);
+      }
+    }
+  }, [queryKey, data, fetchStatus, isFetching]);
+
+  const proofState: ProofStripState = isError ? 'error' : isPending ? 'pending' : 'ready';
 
   useEffect(() => {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
@@ -106,9 +145,7 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div>
-          <h1 className="wordmark">
-            Weather<span>.</span>
-          </h1>
+          <h1 className="wordmark">{datasheetTitle}</h1>
           <p className="tagline">Live weather from Open-Meteo — no API key needed</p>
         </div>
         <div className="header-controls">
@@ -138,6 +175,16 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* Proof strip: counts from the forecast query itself (see ProofStrip). */}
+      <ProofStrip
+        state={proofState}
+        dataUpdatedAt={dataUpdatedAt}
+        fetchStatus={fetchStatus}
+        isFetching={isFetching}
+        cacheServes={cacheServes}
+        cityName={city.name}
+      />
 
       {/* Lotus-petal divider — Achaemenid style only (see index.css) */}
       <div className="lotus-divider" aria-hidden="true">
@@ -198,12 +245,6 @@ export default function App() {
 
         {data && (
           <>
-            {isFetching && (
-              <p className="refresh-note">
-                <span className="mini-spinner" aria-hidden="true" />
-                Refreshing…
-              </p>
-            )}
             <CurrentConditions
               city={city}
               current={data.current}
@@ -211,10 +252,12 @@ export default function App() {
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
             />
+            <HourlyStrip hourly={data.hourly} unit={unit} />
             <div className="content-grid">
               <HourlyChart hourly={data.hourly} unit={unit} />
               <DailyForecast daily={data.daily} unit={unit} />
             </div>
+            <DetailsGrid current={data.current} daily={data.daily} unit={unit} />
             <p className="source-note">
               Data: Open-Meteo (open-meteo.com) · Times shown in {data.timezone}
             </p>

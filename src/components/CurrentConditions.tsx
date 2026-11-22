@@ -1,5 +1,12 @@
 import { Droplets, Gauge, Star, Umbrella, Wind } from 'lucide-react';
-import { describeWeather, formatTemp, type City, type CurrentWeather, type Unit } from '../types';
+import {
+  describeWeather,
+  formatTemp,
+  windDirection,
+  type City,
+  type CurrentWeather,
+  type Unit,
+} from '../types';
 
 interface CurrentConditionsProps {
   city: City;
@@ -7,11 +14,6 @@ interface CurrentConditionsProps {
   unit: Unit;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-}
-
-function windDirection(degrees: number): string {
-  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  return dirs[Math.round(degrees / 45) % 8];
 }
 
 export default function CurrentConditions({

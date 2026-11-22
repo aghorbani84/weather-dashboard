@@ -4,17 +4,29 @@ import type { ForecastResponse, GeoResult } from '../types';
 const FORECAST_BASE = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_BASE = 'https://geocoding-api.open-meteo.com/v1/search';
 
+/**
+ * Audit counter for the proof strip: incremented once per real forecast
+ * network call (retries count too — a request is a request). Read by the
+ * strip on its 1s tick, so it never goes stale. Session-only, never persisted.
+ */
+let forecastRequestCount = 0;
+
+export function getForecastRequestCount(): number {
+  return forecastRequestCount;
+}
+
 export async function fetchForecast(
   latitude: number,
   longitude: number,
   timezone: string,
 ): Promise<ForecastResponse> {
+  forecastRequestCount += 1;
   const { data } = await axios.get<ForecastResponse>(FORECAST_BASE, {
     params: {
       latitude,
       longitude,
       current:
-        'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl',
+        'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index',
       hourly: 'temperature_2m,precipitation_probability,weather_code',
       daily:
         'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset',

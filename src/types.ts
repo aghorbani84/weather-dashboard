@@ -28,6 +28,7 @@ export interface CurrentWeather {
   wind_speed_10m: number;
   wind_direction_10m: number;
   pressure_msl: number;
+  uv_index: number;
 }
 
 export interface ForecastResponse {
@@ -91,6 +92,21 @@ export function describeWeather(code: number): { label: string; icon: string } {
 
 export function toFahrenheit(celsius: number): number {
   return (celsius * 9) / 5 + 32;
+}
+
+/** 16-point compass label for a wind bearing in degrees. */
+export function windDirection(degrees: number): string {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return dirs[Math.round(degrees / 45) % 8];
+}
+
+/** Qualitative UV-index band, derived from the number itself — never invented. */
+export function uvBand(uv: number): string {
+  if (uv < 3) return 'Low';
+  if (uv < 6) return 'Moderate';
+  if (uv < 8) return 'High';
+  if (uv < 11) return 'Very high';
+  return 'Extreme';
 }
 
 export function formatTemp(celsius: number, unit: Unit): string {

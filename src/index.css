@@ -1377,3 +1377,210 @@ button {
     animation: none;
   }
 }
+
+/* ---------- Round 2: proof strip, hourly strip, details grid ---------- */
+
+/* Proof strip — mono audit line in the top bar (rank-1 lesson). Tokens only,
+   so it recolors in all 4 theme combos. */
+.proof-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 var(--s2);
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-card);
+  color: var(--muted);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.proof-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.proof-dot-live {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.proof-dot-error {
+  background: var(--danger);
+}
+
+.proof-text {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Hourly strip — 12 chips, one per hour, from the same forecast response.
+   Scrolls horizontally on narrow screens instead of overflowing the page. */
+.hourly-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.hour-chip {
+  flex: none;
+  width: 68px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+}
+
+.hour-chip-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.hour-chip-icon {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.hour-chip-temp {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hour-chip-precip {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sky);
+  white-space: nowrap;
+}
+
+/* Details grid — 8 readings from the same single forecast response. */
+.details-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.detail-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 13px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.detail-value {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.detail-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- Responsive: phone 360–390px + wide desktop ---------- */
+
+/* Desktop: use the wide layout properly — wider container, still capped. */
+@media (min-width: 1280px) {
+  .app {
+    max-width: 1160px;
+  }
+}
+
+/* Tap targets ≥44px on every control (was 32–38px on several). */
+.mode-toggle {
+  width: 44px;
+  height: 44px;
+}
+
+.style-segmented button,
+.unit-toggle button {
+  min-height: 44px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.favorite-chip button {
+  min-height: 44px;
+}
+
+.search-results button {
+  min-height: 44px;
+}
+
+.retry-btn {
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  /* The datasheet title is long — let it sit smaller so it wraps cleanly. */
+  .wordmark {
+    font-size: 19px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .proof-strip {
+    font-size: 12px;
+  }
+}
+
+/* Reduced motion: the proof dot holds still like everything else. */
+@media (prefers-reduced-motion: reduce) {
+  .proof-dot-live {
+    animation: none;
+  }
+}
