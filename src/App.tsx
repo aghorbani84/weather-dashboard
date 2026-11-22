@@ -5,6 +5,8 @@ import CurrentConditions from './components/CurrentConditions';
 import DailyForecast from './components/DailyForecast';
 import HourlyChart from './components/HourlyChart';
 import FavoritesBar from './components/FavoritesBar';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import { useTheme } from './hooks/useTheme';
 import { useForecast } from './hooks/useWeather';
 import type { City, Unit } from './types';
 
@@ -74,6 +76,8 @@ export default function App() {
   const [unit, setUnit] = useState<Unit>(loadUnit);
   const [favorites, setFavorites] = useState<City[]>(loadFavorites);
 
+  const { style, mode, setStyle, toggleMode } = useTheme();
+
   const { data, isPending, isError, error, refetch, isFetching } = useForecast(city);
 
   useEffect(() => {
@@ -107,25 +111,50 @@ export default function App() {
           </h1>
           <p className="tagline">Live weather from Open-Meteo — no API key needed</p>
         </div>
-        <div className="unit-toggle" role="group" aria-label="Temperature unit">
-          <button
-            type="button"
-            className={unit === 'celsius' ? 'active' : ''}
-            onClick={() => setUnit('celsius')}
-            aria-pressed={unit === 'celsius'}
-          >
-            °C
-          </button>
-          <button
-            type="button"
-            className={unit === 'fahrenheit' ? 'active' : ''}
-            onClick={() => setUnit('fahrenheit')}
-            aria-pressed={unit === 'fahrenheit'}
-          >
-            °F
-          </button>
+        <div className="header-controls">
+          <ThemeSwitcher
+            style={style}
+            mode={mode}
+            onStyleChange={setStyle}
+            onToggleMode={toggleMode}
+          />
+          <div className="unit-toggle" role="group" aria-label="Temperature unit">
+            <button
+              type="button"
+              className={unit === 'celsius' ? 'active' : ''}
+              onClick={() => setUnit('celsius')}
+              aria-pressed={unit === 'celsius'}
+            >
+              °C
+            </button>
+            <button
+              type="button"
+              className={unit === 'fahrenheit' ? 'active' : ''}
+              onClick={() => setUnit('fahrenheit')}
+              aria-pressed={unit === 'fahrenheit'}
+            >
+              °F
+            </button>
+          </div>
         </div>
       </header>
+
+      {/* Lotus-petal divider — Achaemenid style only (see index.css) */}
+      <div className="lotus-divider" aria-hidden="true">
+        <svg preserveAspectRatio="none" viewBox="0 0 280 14">
+          <defs>
+            <pattern id="lotus-pattern" width="28" height="14" patternUnits="userSpaceOnUse">
+              <path
+                d="M14 1 C17.5 5 17.5 9 14 13 C10.5 9 10.5 5 14 1 Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+            </pattern>
+          </defs>
+          <rect width="280" height="14" fill="url(#lotus-pattern)" />
+        </svg>
+      </div>
 
       <SearchBar onSelect={setCity} />
 
@@ -194,7 +223,22 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        Built with React, TypeScript, TanStack Query, axios and Recharts.
+        {/* One Faravahar accent, footer only */}
+        <svg className="faravahar" viewBox="0 0 64 28" aria-hidden="true">
+          <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <circle cx="32" cy="10" r="4" fill="currentColor" stroke="none" />
+            <path d="M27 8 L10 3" />
+            <path d="M27 11 L7 10" />
+            <path d="M27 14 L10 17" />
+            <path d="M37 8 L54 3" />
+            <path d="M37 11 L57 10" />
+            <path d="M37 14 L54 17" />
+            <path d="M32 14 L32 24" />
+            <path d="M32 19 L26 24" />
+            <path d="M32 19 L38 24" />
+          </g>
+        </svg>
+        <span>Built with React, TypeScript, TanStack Query, axios and Recharts.</span>
       </footer>
     </div>
   );

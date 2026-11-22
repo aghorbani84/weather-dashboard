@@ -4,6 +4,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Apply the saved theme before first paint (no white flash).
+      (function () {
+        try {
+          var style = localStorage.getItem('showcase-style');
+          var mode = localStorage.getItem('showcase-mode');
+          document.documentElement.dataset.style =
+            style === 'achaemenid' ? 'achaemenid' : 'modern';
+          document.documentElement.dataset.mode =
+            mode === 'light' || mode === 'dark'
+              ? mode
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+        } catch (e) {
+          document.documentElement.dataset.style = 'modern';
+          document.documentElement.dataset.mode = 'light';
+        }
+      })();
+    </script>
     <title>Weather Dashboard — Live Weather from Open-Meteo</title>
   </head>
   <body>

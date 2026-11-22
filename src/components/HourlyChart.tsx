@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import { toFahrenheit, type ForecastResponse, type Unit } from '../types';
+import { readChartColors, useTheme } from '../hooks/useTheme';
 
 interface HourlyChartProps {
   hourly: ForecastResponse['hourly'];
@@ -17,6 +18,11 @@ interface HourlyChartProps {
 }
 
 export default function HourlyChart({ hourly, unit }: HourlyChartProps) {
+  // Theme colors are read from the live CSS variables and re-read whenever
+  // the theme changes, so the chart recolors instantly with the rest of the app.
+  const { themeKey } = useTheme();
+  const colors = useMemo(() => readChartColors(), [themeKey]);
+
   const data = useMemo(() => {
     // Show the next 24 hours starting from the current hour.
     const now = new Date();
@@ -54,20 +60,20 @@ export default function HourlyChart({ hourly, unit }: HourlyChartProps) {
           <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
             <defs>
               <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2563eb" stopOpacity={0.22} />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity={0.01} />
+                <stop offset="0%" stopColor={colors.line} stopOpacity={0.22} />
+                <stop offset="100%" stopColor={colors.line} stopOpacity={0.01} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke="#e2e8f0" />
+            <CartesianGrid vertical={false} stroke={colors.grid} />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: colors.tick }}
               tickLine={false}
-              axisLine={{ stroke: '#e2e8f0' }}
+              axisLine={{ stroke: colors.grid }}
               interval={2}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: colors.tick }}
               tickLine={false}
               axisLine={false}
               domain={['auto', 'auto']}
@@ -86,7 +92,7 @@ export default function HourlyChart({ hourly, unit }: HourlyChartProps) {
                   </div>
                 );
               }}
-              cursor={{ stroke: '#94a3b8', strokeDasharray: '4 4' }}
+              cursor={{ stroke: colors.cursor, strokeDasharray: '4 4' }}
             />
             <Area
               type="monotone"
@@ -98,10 +104,10 @@ export default function HourlyChart({ hourly, unit }: HourlyChartProps) {
             <Line
               type="monotone"
               dataKey="temperature"
-              stroke="#2563eb"
+              stroke={colors.line}
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+              activeDot={{ r: 5, stroke: colors.surface, strokeWidth: 2 }}
             />
           </ComposedChart>
         </ResponsiveContainer>
